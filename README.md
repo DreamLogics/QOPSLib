@@ -1,4 +1,4 @@
-QOSFLib
+QOPSLib
 =======
 
-Object Stylesheet Library for Qt
+Object Property Sheet Library for Qt

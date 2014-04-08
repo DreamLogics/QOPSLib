@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Object Stylesheet Library for Qt
+** Object Property Sheet Library for Qt
 ** http://www.dreamlogics.com/
 **
 ** Copyright (C) 2014 DreamLogics
@@ -20,8 +20,24 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#include "stylesheetreader.h"
+#ifndef OSSINFORMATIONPROVIDER_H
+#define OSSINFORMATIONPROVIDER_H
 
-StylesheetReader::StylesheetReader()
+#include <QString>
+
+namespace QOPS
 {
+
+class IOSFInformationProvider
+{
+public:
+    virtual ~IOSFInformationProvider() {}
+
+    virtual QString variableForObject(QString id) = 0;
+    virtual double heightScale() = 0;
+    virtual double widthScale() = 0;
+};
+
 }
+
+#endif // OSSINFORMATIONPROVIDER_H

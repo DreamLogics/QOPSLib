@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Object Stylesheet Library for Qt
+** Object Property Sheet Library for Qt
 ** http://www.dreamlogics.com/
 **
 ** Copyright (C) 2014 DreamLogics
@@ -20,8 +20,35 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#include "stylesheet.h"
+#ifndef STYLESHEETPRIVATE_H
+#define STYLESHEETPRIVATE_H
 
-Stylesheet::Stylesheet()
+#include <QString>
+#include <QHash>
+#include <style.h>
+#include <animation.h>
+
+namespace QOPS
 {
+
+class StylesheetPrivate
+{
+public:
+    StylesheetPrivate();
+
+private:
+
+    int m_iRefCount;
+    QHash<QString,Style> m_objectStyles;
+    QHash<QString,Style> m_classStyles;
+
+    QHash<QString,Animation> m_animations;
+
+    QHash<QString,QString> m_variables;
+
+    friend class Stylesheet;
+};
+
 }
+
+#endif // STYLESHEETPRIVATE_H

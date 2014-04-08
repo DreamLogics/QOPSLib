@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Object Stylesheet Library for Qt
+** Object Property Sheet Library for Qt
 ** http://www.dreamlogics.com/
 **
 ** Copyright (C) 2014 DreamLogics
@@ -20,13 +20,15 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLESHEETWRITER_H
-#define STYLESHEETWRITER_H
+#ifndef QOPSLIB_GLOBAL_H
+#define QOPSLIB_GLOBAL_H
 
-class StylesheetWriter
-{
-public:
-    StylesheetWriter();
-};
+#include <QtCore/qglobal.h>
 
-#endif // STYLESHEETWRITER_H
+#if defined(QOPSLIB_LIBRARY)
+#  define QOPSLIBSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define QOPSLIBSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // QOPSLIB_GLOBAL_H

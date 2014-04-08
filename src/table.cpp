@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Object Stylesheet Library for Qt
+** Object Property Sheet Library for Qt
 ** http://www.dreamlogics.com/
 **
 ** Copyright (C) 2014 DreamLogics
@@ -20,41 +20,8 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLESHEET_H
-#define STYLESHEET_H
-
-#include <QString>
 #include "style.h"
-#include "animation.h"
 
-namespace QOSF
+Style::Style()
 {
-
-class StylesheetPrivate;
-
-class Stylesheet
-{
-public:
-    Stylesheet();
-    ~Stylesheet();
-
-    Style objectStyle(QString id) const;
-    Style classStyle(QString classname, QString object_id) const;
-    void addObjectStyle(QString id, Style s) const;
-    void addClassStyle(QString classname, Style s, QString object_id = QString()) const;
-
-    Animation animation(QString id) const;
-    void addAnimation(QString id, Animation ani) const;
-
-    QString variable(QString varname) const;
-    void setVariable(QString varname, QString value) const;
-
-private:
-
-    StylesheetPrivate *m_p;
-
-};
-
 }
-
-#endif // STYLESHEET_H

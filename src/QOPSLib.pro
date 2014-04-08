@@ -6,31 +6,31 @@
 
 QT       -= gui
 
-TARGET = QOSFLib
+TARGET = QOPSLib
 TEMPLATE = lib
 
-DEFINES += QOSFLIB_LIBRARY
+DEFINES += QOPSLIB_LIBRARY
 
 SOURCES += \
-    stylesheet.cpp \
-    style.cpp \
+    propsheet.cpp \
+    table.cpp \
     property.cpp \
-    stylesheetreader.cpp \
-    stylesheetwriter.cpp \
+    propsheetreader.cpp \
+    propsheetwriter.cpp \
     animation.cpp
 
 HEADERS +=\
-    stylesheet.h \
-    style.h \
+    propsheet.h \
+    table.h \
     property.h \
-    stylesheetreader.h \
-    stylesheetwriter.h \
-    stylesheetprivate.h \
+    propsheetreader.h \
+    propsheetwriter.h \
+    propsheetprivate.h \
     styleprivate.h \
     propertyprivate.h \
     animation.h \
-    qosflib_global.h \
-    osfinformationprovider.h
+    qopslib_global.h \
+    opsinformationprovider.h
 
 unix {
     target.path = /usr/lib

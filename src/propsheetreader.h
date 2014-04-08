@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Object Stylesheet Library for Qt
+** Object Property Sheet Library for Qt
 ** http://www.dreamlogics.com/
 **
 ** Copyright (C) 2014 DreamLogics
@@ -20,13 +20,13 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLE_H
-#define STYLE_H
+#ifndef STYLESHEETREADER_H
+#define STYLESHEETREADER_H
 
-class Style
+class StylesheetReader
 {
 public:
-    Style();
+    StylesheetReader();
 };
 
-#endif // STYLE_H
+#endif // STYLESHEETREADER_H
