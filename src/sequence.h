@@ -20,13 +20,13 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef ANIMATION_H
-#define ANIMATION_H
+#ifndef SEQUENCE_H
+#define SEQUENCE_H
 
-class Animation
+class Sequence
 {
 public:
-    Animation();
+    Sequence();
 };
 
-#endif // ANIMATION_H
+#endif // SEQUENCE_H

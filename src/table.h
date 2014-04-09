@@ -23,10 +23,10 @@
 #ifndef STYLE_H
 #define STYLE_H
 
-class Style
+class Table
 {
 public:
-    Style();
+    Table();
 };
 
 #endif // STYLE_H

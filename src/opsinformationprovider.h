@@ -28,14 +28,14 @@
 namespace QOPS
 {
 
-class IOSFInformationProvider
+class InformationProvider
 {
 public:
-    virtual ~IOSFInformationProvider() {}
+    virtual ~InformationProvider() {}
 
-    virtual QString variableForObject(QString id) = 0;
-    virtual double heightScale() = 0;
-    virtual double widthScale() = 0;
+    virtual QString sysVarForObject(QString id, QString ns) = 0;
+    virtual double scaleForProp(QString propname) = 0;
+    virtual QByteArray importPropsheet(QString filename) = 0;
 };
 
 }

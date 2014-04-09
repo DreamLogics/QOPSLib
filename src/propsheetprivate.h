@@ -25,28 +25,34 @@
 
 #include <QString>
 #include <QHash>
-#include <style.h>
-#include <animation.h>
+#include <table.h>
+#include <sequence.h>
 
 namespace QOPS
 {
 
-class StylesheetPrivate
+class InformationProvider;
+
+class PropsheetPrivate
 {
 public:
-    StylesheetPrivate();
+    PropsheetPrivate();
 
 private:
 
     int m_iRefCount;
-    QHash<QString,Style> m_objectStyles;
-    QHash<QString,Style> m_classStyles;
+    QHash<QString, QHash<QString,Table> > m_objectPropTables;
 
-    QHash<QString,Animation> m_animations;
+    QHash<QString, QHash<QString,Sequence> > m_sequences;
 
-    QHash<QString,QString> m_variables;
+    QHash<QString, QHash<QString,QString> > m_variables;
 
-    friend class Stylesheet;
+    InformationProvider *m_pInformationProvider;
+
+    bool bIsNull;
+
+    friend class Propsheet;
+    friend class PropsheetReader;
 };
 
 }

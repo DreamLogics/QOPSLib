@@ -24,31 +24,32 @@
 #define STYLESHEET_H
 
 #include <QString>
-#include "style.h"
-#include "animation.h"
+#include "table.h"
+#include "sequence.h"
 
 namespace QOPS
 {
 
 class PropsheetPrivate;
+class InformationProvider;
 
 class Propsheet
 {
 public:
-    Propsheet();
+    Propsheet(InformationProvider *ip=0);
+    Propsheet(Propsheet &ref);
     ~Propsheet();
 
-    Style objectPropertyTable(QString id, QString ns = QString()) const;
-    Style classPropertyTable(QString classname, QString object_id, QString ns = QString()) const;
-    void addObjectStyle(QString id, Style s, QString ns = QString()) const;
-    void addClassStyle(QString classname, Style s, QString ns = QString()) const;
-    void addClassStyle(QString classname, Style s, QString ns = QString(), QString object_id = QString()) const;
+    Table objectPropertyTable(QString id, QString ns = QString()) const;
+    void addObjectPropertyTable(QString id, Table t, QString ns = QString()) const;
 
-    Animation animation(QString id) const;
-    void addAnimation(QString id, Animation ani) const;
+    Sequence sequence(QString id, QString ns = QString()) const;
+    void addSequence(QString id, Sequence seq, QString ns = QString()) const;
 
-    QString variable(QString varname) const;
-    void setVariable(QString varname, QString value) const;
+    QString variable(QString varname, QString ns = QString()) const;
+    void setVariable(QString varname, QString value, QString ns = QString()) const;
+
+    bool isNull() const;
 
 private:
 

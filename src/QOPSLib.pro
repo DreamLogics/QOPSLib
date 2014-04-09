@@ -17,7 +17,7 @@ SOURCES += \
     property.cpp \
     propsheetreader.cpp \
     propsheetwriter.cpp \
-    animation.cpp
+    sequence.cpp
 
 HEADERS +=\
     propsheet.h \
@@ -28,9 +28,11 @@ HEADERS +=\
     propsheetprivate.h \
     styleprivate.h \
     propertyprivate.h \
-    animation.h \
     qopslib_global.h \
-    opsinformationprovider.h
+    opsinformationprovider.h \
+    qopslib.h \
+    sequence.h \
+    propsheetreaderprivate.h
 
 unix {
     target.path = /usr/lib

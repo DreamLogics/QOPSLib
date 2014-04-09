@@ -20,8 +20,8 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#include "animation.h"
+#include "sequence.h"
 
-Animation::Animation()
+Sequence::Sequence()
 {
 }

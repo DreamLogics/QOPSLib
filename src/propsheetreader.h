@@ -20,13 +20,40 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLESHEETREADER_H
-#define STYLESHEETREADER_H
+#ifndef PROPSHEETREADER_H
+#define PROPSHEETREADER_H
 
-class StylesheetReader
+#include "propsheet.h"
+#include <QByteArray>
+
+#define QOPS_NO_ERR 0
+#define QOPS_ERR_FILE 1 //could not open file
+#define QOPS_ERR_PARSE 2 //parsing error
+
+namespace QOPS
+{
+
+class InformationProvider;
+class PropsheetReaderPrivate;
+
+class PropsheetReader
 {
 public:
-    StylesheetReader();
+    PropsheetReader(InformationProvider *ip=0);
+    PropsheetReader(PropsheetReader &ref);
+    ~PropsheetReader();
+
+    Propsheet fromData(QByteArray &data) const;
+    Propsheet fromString(QString str) const;
+
+    int getError() const;
+
+private:
+
+    PropsheetReaderPrivate *m_p;
+
 };
 
-#endif // STYLESHEETREADER_H
+}
+
+#endif // PROPSHEETREADER_H
