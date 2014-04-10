@@ -20,7 +20,28 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLEPRIVATE_H
-#define STYLEPRIVATE_H
+#ifndef TABLEPRIVATE_H
+#define TABLEPRIVATE_H
 
-#endif // STYLEPRIVATE_H
+namespace QOPS
+{
+
+class InformationProvider;
+
+class TablePrivate
+{
+public:
+    TablePrivate();
+
+private:
+
+    InformationProvider *pIP;
+
+    friend class Table;
+    friend class Propsheet;
+};
+
+}
+
+
+#endif // TABLEPRIVATE_H

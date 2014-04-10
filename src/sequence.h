@@ -23,10 +23,16 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
+#include <QString>
+
+namespace QOPS
+{
+
 class Sequence
 {
 public:
-    Sequence();
+    Sequence(QString name, int start, int end);
 };
+}
 
 #endif // SEQUENCE_H

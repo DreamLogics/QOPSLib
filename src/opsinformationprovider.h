@@ -34,7 +34,7 @@ public:
     virtual ~InformationProvider() {}
 
     virtual QString sysVarForObject(QString id, QString ns) = 0;
-    virtual double scaleForProp(QString propname) = 0;
+    virtual QString valueForProp(QString prop, QString value, QString rule) = 0;
     virtual QByteArray importPropsheet(QString filename) = 0;
 };
 

@@ -9,6 +9,14 @@ QT       -= gui
 TARGET = QOPSLib
 TEMPLATE = lib
 
+CONFIG += use_gui
+
+use_gui
+{
+    DEFINES += USE_GUI
+    QT += gui
+}
+
 DEFINES += QOPSLIB_LIBRARY
 
 SOURCES += \
@@ -26,13 +34,13 @@ HEADERS +=\
     propsheetreader.h \
     propsheetwriter.h \
     propsheetprivate.h \
-    styleprivate.h \
     propertyprivate.h \
     qopslib_global.h \
     opsinformationprovider.h \
     qopslib.h \
     sequence.h \
-    propsheetreaderprivate.h
+    propsheetreaderprivate.h \
+    tableprivate.h
 
 unix {
     target.path = /usr/lib

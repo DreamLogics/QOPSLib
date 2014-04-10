@@ -23,5 +23,34 @@
 #ifndef PROPERTYPRIVATE_H
 #define PROPERTYPRIVATE_H
 
+#include <QString>
+#include <QMap>
+
+namespace QOPS
+{
+
+class InformationProvider;
+
+class PropertyPrivate
+{
+public:
+    PropertyPrivate();
+
+private:
+
+    int iRefCount;
+
+    QMap<int,QString> sValues;
+    QString sRule;
+    bool bIsNull;
+
+    InformationProvider *pIP;
+
+    friend class Property;
+    friend class Table;
+    friend class Propsheet;
+};
+
+}
 
 #endif // PROPERTYPRIVATE_H

@@ -20,13 +20,21 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef STYLE_H
-#define STYLE_H
+#ifndef TABLE_H
+#define TABLE_H
 
+#include <QString>
+#include "property.h"
+
+namespace QOPS
+{
 class Table
 {
 public:
-    Table();
-};
+    Table(QString name);
 
-#endif // STYLE_H
+    void addProperty(QString name, Property prop) const;
+    Property property(QString name) const;
+};
+}
+#endif // TABLE_H

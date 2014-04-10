@@ -23,6 +23,8 @@
 #include "propsheetreader.h"
 #include "propsheetreaderprivate.h"
 #include "opsinformationprovider.h"
+#include <QList>
+#include <QRegExp>
 
 using namespace QOPS;
 
@@ -75,6 +77,64 @@ PropsheetReaderPrivate::PropsheetReaderPrivate()
 void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
 {
     //preprocess
+
+    //TODO: make all the magic happen in 1 run instead of 2?
+
+    int level = 0;
+    QString nd;
+    bool bLC = false;
+    bool bSC = false;
+    bool bLit = false;
+
+    for (int i=0;i<data.size();i++) // remove comments and check brackets
+    {
+
+        if (!bLC && !bSC && !bLit)
+        {
+            if (data[i] == '"')
+            {
+                bLit = true;
+                nd += data[i];
+            }
+            else if (data.mid(i,2) == "//")
+                bLC = true;
+            else if (data.mid(i,2) == "/*")
+                bSC = true;
+            else
+            {
+                if (data[i] == '{')
+                    level++;
+                else if (data[i] == '}')
+                    level--;
+                nd += data[i];
+            }
+        }
+        else if (bLC)
+        {
+            if (data[i] == '\n' || data[i] == '\r')
+                bLC = false;
+        }
+        else if (bSC)
+        {
+            if (data.mid(i,2) == "*/")
+                bSC = false;
+        }
+        else if (bLit)
+        {
+            if (data[i] == '"')
+                bLit = false;
+            nd += data[i];
+        }
+    }
+
+    if (level != 0) //too few or too many brackets
+    {
+        iErrorCode = QOPS_ERR_PARSE;
+        return;
+    }
+
+    data = nd;
+
     data.replace(QRegExp("[\n\r\t]+"),"");
 
     if (pIP)
@@ -83,62 +143,69 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
         import(data);
     }
 
-    int level = 0;
+
     QChar c;
     QString temp;
     QString ns;
     QString name;
     Table table;
+    Sequence seq;
 
     mode cmode = mode_base;
-    mode pmode;
+    //mode pmode;
+    QList<mode> pmode;
 
     for (int i=0;i<data.size();i++)
     {
         c = data[i];
         if (cmode == mode_base)
         {
-            if (c == '$')
+            if (c == '$') // variable
             {
-                ns = QString();
-                pmode = mode_base;
+                pmode.push_front(cmode);
                 cmode = mode_in_var;
                 temp = "";
             }
-            else if (c == '@')
+            else if (c == '@') // at-rule
             {
-                ns = QString();
-                pmode = mode_base;
+                pmode.push_front(cmode);
                 cmode = mode_in_atrule;
                 temp = "";
             }
-            else if (c == '}')
+            else if (c == '}') // } found before {, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
                 return;
             }
-            else if (c == '{')
+            else if (c == '{') // not in at-rule, must be prop table
             {
                 //object prop table found
                 table = Table();
                 temp.replace(" ","");
                 propsheet.addObjectPropertyTable(temp,table);
-                pmode = mode_base;
+                pmode.push_front(cmode);
                 cmode = mode_in_objproptable;
             }
             else
-                temp += c;
+                temp += c; // temp will contain the identifier for the prop table
 
         }
         else if (cmode == mode_in_objproptable)
         {
-            if (c == '}')
+            if (c == '"') // literal mode on
+            {
+                pmode.push_front(cmode);
+                cmode = mode_literal;
+                temp += c;
+            }
+            else if (c == '}') // prop table closing tag found, parse props and go back to previous level
             {
                 parseProps(temp,table);
                 temp = "";
-                cmode = pmode;
+                cmode = pmode.front();
+                pmode.pop_front();
             }
-            else if (c == '{')
+            else if (c == '{') // prop table can't contain {, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
                 return;
@@ -146,18 +213,89 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             else
                 temp += c;
         }
+        else if (cmode == mode_literal)
+        {
+            if (c == '"') // literal mode off
+            {
+                cmode = pmode.front();
+                pmode.pop_front();
+            }
+
+            temp += c;
+        }
         else if (cmode == mode_in_ns)
         {
-
+            if (c == '$') // variable
+            {
+                pmode.push_front(cmode);
+                cmode = mode_in_var;
+                temp = "";
+            }
+            else if (c == '@') // at-rule
+            {
+                pmode.push_front(cmode);
+                cmode = mode_in_atrule;
+                temp = "";
+            }
+            else if (c == '}') // end of namespace
+            {
+                ns = QString();
+                cmode = pmode.front();
+                pmode.pop_front();
+                temp = "";
+            }
+            else if (c == '{') // not in at-rule, must be prop table
+            {
+                //object prop table found
+                temp.replace(" ","");
+                table = Table(temp);
+                propsheet.addObjectPropertyTable(temp,table);
+                pmode.push_front(cmode);
+                cmode = mode_in_objproptable;
+            }
+            else
+                temp += c; // temp will contain the identifier for the prop table
         }
         else if (cmode == mode_in_seq)
         {
+            // name should be "some_name(range_start,range_end)"
+
+            if (c == '"') // enter literal mode
+            {
+                pmode.push_front(cmode);
+                cmode = mode_literal;
+            }
+            else if (c == '{')
+                level++;
+            else if (c == '}')
+                level--;
+
+
+            if (level == 0) // last } found, parse sequence
+            {
+                QRegExp seqreg("([^\\()]+)\\(([0-9]+),([0-9]+)\\)");
+                name.replace(" ","");
+                if (seqreg.indexIn(name) == -1)
+                {
+                    iErrorCode = QOPS_ERR_PARSE;
+                    return;
+                }
+                seq = Sequence(seqreg.cap(1),seqreg.cap(2).toInt(),seqreg.cap(3).toInt());
+                parseSeq(temp,seq);
+                propsheet.addSequence(seqreg.cap(1),seq,ns);
+
+                cmode = pmode.front();
+                pmode.pop_front();
+            }
+            else
+                temp += c;
 
         }
         else if (cmode == mode_in_var)
         {
             if (c == ';')
             {
+                // temp should be "var_name=value"
                 parseVar(temp,propsheet,ns);
                 cmode = pmode;
             }
@@ -166,7 +304,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
         }
         else if (cmode == mode_in_atrule)
         {
-            if (c == '{')
+            if (c == '{') // start of at-rule block
             {
                 if (temp.startsWith("namespace"))
                 {
@@ -178,6 +316,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
                 }
                 else if (temp.startsWith("sequence"))
                 {
+                    level = 1;
                     temp.replace(" ","");
                     temp = temp.mid(8);
                     name = temp;
@@ -190,7 +329,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
                     return;
                 }
             }
-            else if (c == '}')
+            else if (c == '}') // the at-rule block ended without starting, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
                 return;
@@ -204,6 +343,81 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
 }
 
 void PropsheetReaderPrivate::parseProps(QString data, Table &table)
+{
+    QRegExp propreg("([^:]+):([^;]+);");
+    QRegExp cleanspaces("(^ +| +$)");
+    QRegExp proprulereg("!([a-zA-Z]+)$");
+    int n;
+    int off = 0;
+    QString name,value,proprule;
+
+
+    while ((n = propreg.indexIn(data,off)) != -1)
+    {
+        name = propreg.cap(1).replace(cleanspaces,"");
+
+        Property prop(name);
+
+        value = propreg.cap(2).replace(cleanspaces,"");
+        if (proprulereg.indexIn(value) != -1)
+        {
+            proprule = proprulereg.cap(1);
+            value = value.left(value.size()-proprulereg.cap(0).size()).replace(cleanspaces,"");
+            prop.setRule(proprule);
+        }
+
+        prop.setValue(value);
+
+        // extract parts
+        // exlude literal and between "(" ")"
+
+        bool bLit = false;
+        bool bSpace = false;
+        QString part;
+        int partc = 0;
+
+        for (int i=0;i<value.size();i++)
+        {
+            if (!bLit && !bSpace)
+            {
+                if (value[i] == '"' || value[i] == '(')
+                    bLit = true;
+                else if (value[i] == ' ')
+                {
+                    //end of part
+                    prop.setValue(part,partc);
+                    partc++;
+                    part="";
+                    bSpace = true;
+                    continue;
+                }
+            }
+            else if (bSpace)
+            {
+                if (value[i] != ' ')
+                    bSpace = false;
+                else
+                    continue;
+            }
+            else
+            {
+                if (value[i] == '"' || value[i] == ')')
+                    bLit = false;
+            }
+            part += value[i];
+        }
+
+
+        off = n + propreg.cap(0).size();
+    }
+}
+
+void PropsheetReaderPrivate::parseVar(QString data, Propsheet &propsheet, QString ns)
+{
+
+}
+
+void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
 {
 
 }

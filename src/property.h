@@ -23,10 +23,55 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
+#include <QString>
+
+#ifdef USE_GUI
+#include <QColor>
+#endif
+
+namespace QOPS
+{
+
+class PropertyPrivate;
+
 class Property
 {
 public:
+    Property(QString name);
     Property();
+    Property(Property &ref);
+    ~Property();
+
+    Property copy() const;
+
+    QString name() const;
+
+    void setValue(QString val, int index=0) const;
+    void setValue(int val, int index=0) const;
+    void setValue(double val, int index=0) const;
+    void setValue(bool val, int index=0) const;
+
+    QString toString(int index=0) const;
+    int toInt(int index=0) const;
+    double toDouble(int index=0) const;
+    bool toBool(int index=0) const;
+
+    bool isNull() const;
+
+    QString rule() const;
+    void setRule(QString rule) const;
+
+#ifdef USE_GUI
+    void setValue(QColor val, int index=0) const;
+    QColor toColor(int index=0) const;
+#endif
+
+private:
+
+    PropertyPrivate *m_p;
+    QString m_sName;
 };
+
+}
 
 #endif // PROPERTY_H
