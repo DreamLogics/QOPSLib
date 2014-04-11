@@ -40,16 +40,22 @@ public:
     Propsheet(Propsheet &ref);
     ~Propsheet();
 
+#ifndef NO_SMART_POINTERS
+    Propsheet copy() const;
+#endif
+
     Table objectPropertyTable(QString id, QString ns = QString()) const;
-    void addObjectPropertyTable(QString id, Table t, QString ns = QString()) const;
+    void addObjectPropertyTable(Table t, QString ns = QString()) const;
 
     Sequence sequence(QString id, QString ns = QString()) const;
-    void addSequence(QString id, Sequence seq, QString ns = QString()) const;
+    void addSequence(Sequence seq, QString ns = QString()) const;
 
     QString variable(QString varname, QString ns = QString()) const;
     void setVariable(QString varname, QString value, QString ns = QString()) const;
 
-    bool isNull() const;
+#ifndef NO_SMART_POINTERS
+    virtual Propsheet& operator=(const Propsheet&);
+#endif
 
 private:
 

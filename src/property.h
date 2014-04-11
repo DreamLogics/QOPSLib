@@ -34,6 +34,12 @@ namespace QOPS
 
 class PropertyPrivate;
 
+/*!
+ * \brief An object property.
+ *
+ * Object properties can either be singlepart or multipart.
+ */
+
 class Property
 {
 public:
@@ -42,7 +48,9 @@ public:
     Property(Property &ref);
     ~Property();
 
+#ifndef NO_SMART_POINTERS
     Property copy() const;
+#endif
 
     QString name() const;
 
@@ -66,10 +74,18 @@ public:
     QColor toColor(int index=0) const;
 #endif
 
+    virtual bool operator==(const Property&);
+#ifndef NO_SMART_POINTERS
+    virtual Property& operator=(const Property&);
+#endif
+
 private:
 
     PropertyPrivate *m_p;
     QString m_sName;
+
+    friend class Table;
+    friend class Propsheet;
 };
 
 }

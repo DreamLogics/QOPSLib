@@ -23,6 +23,9 @@
 #ifndef TABLEPRIVATE_H
 #define TABLEPRIVATE_H
 
+#include <QHash>
+#include "property.h"
+
 namespace QOPS
 {
 
@@ -35,7 +38,11 @@ public:
 
 private:
 
+    int iRefCount;
+
     InformationProvider *pIP;
+
+    QHash<QString,Property> pProps;
 
     friend class Table;
     friend class Propsheet;

@@ -41,16 +41,34 @@ Property::Property()
 
 Property::Property(Property &ref)
 {
+#ifndef NO_SMART_POINTERS
     m_p = ref.m_p;
     m_sName = ref.m_sName;
     m_p->iRefCount++;
+#else
+    m_p = new PropertyPrivate();
+    m_p->bIsNull = ref.m_p->bIsNull;
+    m_p->sRule = ref.m_p->sRule;
+    m_p->sValues = ref.m_p->sValues;
+    m_p->pIP = ref.m_p->pIP;
+    m_sName = ref.m_sName;
+#endif
 }
 
 Property::~Property()
 {
+#ifndef NO_SMART_POINTERS
     if (--m_p->iRefCount <= 0)
         delete m_p;
+#else
+    delete m_p;
+#endif
 }
+#ifndef NO_SMART_POINTERS
+/*!
+ * \brief Creates a copy of the current property.
+ * \return Copy of current property.
+ */
 
 Property Property::copy() const
 {
@@ -61,46 +79,111 @@ Property Property::copy() const
     p.m_sName = m_sName;
     return p;
 }
+#endif
+/*!
+ * \brief Returns the property name.
+ * \return Property name as string.
+ */
 
 QString Property::name() const
 {
     return m_sName;
 }
 
+/*!
+ * \brief Sets the value of the property.
+ * \param val The value as a string.
+ * \param index Multipart values may be set using an index. Omit for singlepart values.
+ */
+
 void Property::setValue(QString val, int index) const
 {
     m_p->sValues[index] = val;
+    m_p->bIsNull = val.isNull();
 }
+
+/*!
+ * \brief Sets the value of the property.
+ * \param val The value as an integer.
+ * \param index Multipart values may be set using an index. Omit for singlepart values.
+ */
+
 void Property::setValue(int val, int index) const
 {
     m_p->sValues[index] = QString::number(val);
+    m_p->bIsNull = false;
 }
+
+/*!
+ * \brief Sets the value of the property.
+ * \param val The value as a double.
+ * \param index Multipart values may be set using an index. Omit for singlepart values.
+ */
+
 void Property::setValue(double val, int index) const
 {
     m_p->sValues[index] = QString::number(val);
+    m_p->bIsNull = false;
 }
+
+/*!
+ * \brief Sets the value of the property.
+ * \param val The value as a boolean.
+ * \param index Multipart values may be set using an index. Omit for singlepart values.
+ */
+
 void Property::setValue(bool val, int index) const
 {
     if (val)
         m_p->sValues[index] = "true";
     else
         m_p->sValues[index] = "false";
+    m_p->bIsNull = false;
 }
+
+/*!
+ * \brief Gives the property value as a string.
+ * \param index If the property has a multipart value, use the index to retreive the correct part. Omit for singlepart values.
+ * \return Property value as a string.
+ */
 
 QString Property::toString(int index) const
 {
+    if (!m_p->sValues.contains(index))
+        return QString();
     if (m_p->pIP)
         return m_p->pIP->valueForProp(m_sName,m_p->sValues[index],m_p->sRule);
     return m_p->sValues[index];
 }
+
+/*!
+ * \brief Gives the property value as an integer.
+ * \param index If the property has a multipart value, use the index to retreive the correct part. Omit for singlepart values.
+ * \return Property value as an integer.
+ */
+
 int Property::toInt(int index) const
 {
     return toString(index).toInt();
 }
+
+/*!
+ * \brief Gives the property value as a double.
+ * \param index If the property has a multipart value, use the index to retreive the correct part. Omit for singlepart values.
+ * \return Property value as a double.
+ */
+
 double Property::toDouble(int index) const
 {
     return toString(index).toDouble();
 }
+
+/*!
+ * \brief Gives the property value as a boolean.
+ * \param index If the property has a multipart value, use the index to retreive the correct part. Omit for singlepart values.
+ * \return Property value as a boolean.
+ */
+
 bool Property::toBool(int index) const
 {
     QString val = toString(index);
@@ -109,27 +192,109 @@ bool Property::toBool(int index) const
     return false;
 }
 
+/*!
+ * \brief Checks if the property has a value set. (an empty string is still a valid value)
+ * \return True when null.
+ */
+
 bool Property::isNull() const
 {
     return m_p->bIsNull;
 }
 
+/*!
+ * \brief Gives the property rule.
+ * \return Property rule as a string.
+ */
+
 QString Property::rule() const
 {
     return m_p->sRule;
 }
+
+/*!
+ * \brief Sets the property rule.
+ * \param rule The propery rule as a string.
+ */
+
 void Property::setRule(QString rule) const
 {
     m_p->sRule = rule;
 }
 
 #ifdef USE_GUI
+
+/*!
+ * \brief Sets the value of the property.
+ * \param val The value as a QColor object.
+ * \param index Multipart values may be set using an index. Omit for singlepart values.
+ */
+
 void Property::setValue(QColor val, int index) const
 {
-
+    //rgba(#,#,#,#)
+    m_p->sValues[index] = "rgba(" + QString::number(val.red()) + "," + QString::number(val.green()) + "," + QString::number(val.blue()) + "," + QString::number(val.alpha()) + ")";
 }
+
+/*!
+ * \brief Gives the property value as a QColor object.
+ * \param index If the property has a multipart value, use the index to retreive the correct part. Omit for singlepart values.
+ * \return Property value as a QColor object.
+ */
+
 QColor Property::toColor(int index) const
+{
+    QRegExp rgbareg("rgba\\(([0-9]+),([0-9]+),([0-9]+),([0-9]+)\\)");
+    QRegExp rgbreg("rgb\\(([0-9]+),([0-9]+),([0-9]+)\\)");
+    QString val = toString(index);
+    QColor c();
+    if (rgbareg.indexIn(val) != -1)
+    {
+        c.setRed(rgbareg.cap(1).toInt());
+        c.setGreen(rgbareg.cap(2).toInt());
+        c.setBlue(rgbareg.cap(3).toInt());
+        c.setAlpha(rgbareg.cap(4).toInt());
+    }
+    else if (rgbreg.indexIn(val) != -1)
+    {
+        c.setRed(rgbreg.cap(1).toInt());
+        c.setGreen(rgbreg.cap(2).toInt());
+        c.setBlue(rgbreg.cap(3).toInt());
+        c.setAlpha(255);
+    }
+    return c;
+}
+#endif
+
+/*!
+ * \brief Checks if the properties have the same name.
+ * \param other Property to check againts.
+ * \return name() == other.name()
+ */
+
+bool Property::operator ==(const Property& other)
+{
+    return name() == other.name();
+}
+#ifndef NO_SMART_POINTERS
+Property& Property::operator=(const Property &other)
+{
+    if (--m_p->iRefCount <= 0)
+        delete m_p;
+    m_p = other.m_p;
+    m_sName = other.m_sName;
+    m_p->iRefCount++;
+    return *this;
+}
+#endif
+/*
+ * Private Impl.
+ */
+#ifndef NO_SMART_POINTERS
+PropertyPrivate::PropertyPrivate() : iRefCount(1), pIP(0), bIsNull(true)
+#else
+PropertyPrivate::PropertyPrivate() : pIP(0), bIsNull(true)
+#endif
 {
 
 }
-#endif

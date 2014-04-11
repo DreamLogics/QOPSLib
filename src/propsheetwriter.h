@@ -23,10 +23,15 @@
 #ifndef STYLESHEETWRITER_H
 #define STYLESHEETWRITER_H
 
+namespace QOPS
+{
+
 class StylesheetWriter
 {
 public:
     StylesheetWriter();
 };
+
+}
 
 #endif // STYLESHEETWRITER_H

@@ -40,16 +40,15 @@ public:
 
 private:
 
-    int m_iRefCount;
-    QHash<QString, QHash<QString,Table> > m_objectPropTables;
+#ifndef NO_SMART_POINTERS
+    int iRefCount;
+#endif
 
-    QHash<QString, QHash<QString,Sequence> > m_sequences;
+    QHash<QString, QHash<QString,Table> > objectPropTables;
+    QHash<QString, QHash<QString,Sequence> > sequences;
+    QHash<QString, QHash<QString,QString> > variables;
 
-    QHash<QString, QHash<QString,QString> > m_variables;
-
-    InformationProvider *m_pInformationProvider;
-
-    bool bIsNull;
+    InformationProvider *pInformationProvider;
 
     friend class Propsheet;
     friend class PropsheetReader;

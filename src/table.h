@@ -28,13 +28,41 @@
 
 namespace QOPS
 {
+
+class TablePrivate;
+
+
+/*!
+ * \brief %Property table class.
+ */
+
 class Table
 {
 public:
+    Table();
+    Table(Table &ref);
     Table(QString name);
+    ~Table();
+#ifndef NO_SMART_POINTERS
+    Table copy() const;
+#endif
+    QString name() const;
 
-    void addProperty(QString name, Property prop) const;
+    void addProperty(Property prop) const;
     Property property(QString name) const;
+    void removeProperty(QString name) const;
+
+
+    virtual bool operator==(const Property&);
+#ifndef NO_SMART_POINTERS
+    virtual Property& operator=(const Property&);
+#endif
+
+private:
+
+    TablePrivate *m_p;
+    QString m_sName;
+
 };
 }
 #endif // TABLE_H

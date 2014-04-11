@@ -37,9 +37,9 @@ public:
     PropertyPrivate();
 
 private:
-
+#ifndef NO_SMART_POINTERS
     int iRefCount;
-
+#endif
     QMap<int,QString> sValues;
     QString sRule;
     bool bIsNull;
