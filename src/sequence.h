@@ -24,14 +24,39 @@
 #define SEQUENCE_H
 
 #include <QString>
+#include "table.h"
 
 namespace QOPS
 {
+
+class SequencePrivate;
+
+/*!
+ * \brief A %Sequence contains frames (object %property tables) for objects. Sequences can
+ * be used as animations or as a way to represent multiple object states.
+ */
 
 class Sequence
 {
 public:
     Sequence(QString name, int start, int end);
+    Sequence(Sequence &ref);
+    Sequence();
+    ~Sequence();
+
+    int startIndex() const;
+    int endIndex() const;
+
+    Table startFrame(QString object_id) const;
+    Table endFrame(QString object_id) const;
+    Table frame(QString object_id, int frame_index) const;
+
+    void setFrame(QString object_id, int index, Table frame) const;
+
+private:
+
+    SequencePrivate *m_p;
+    QString m_sName;
 };
 }
 

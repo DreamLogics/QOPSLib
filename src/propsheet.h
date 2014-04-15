@@ -33,6 +33,12 @@ namespace QOPS
 class PropsheetPrivate;
 class InformationProvider;
 
+/*!
+ * \brief A %property sheet.
+ *
+ * %Property sheets contain object %property %tables, %property sequences and variables.
+ */
+
 class Propsheet
 {
 public:

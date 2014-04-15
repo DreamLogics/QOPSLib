@@ -193,6 +193,16 @@ bool Property::toBool(int index) const
 }
 
 /*!
+ * \brief Gives the amount of parts.
+ * \return %Property part count.
+ */
+
+int Property::partCount() const
+{
+    return m_p->sValues.size();
+}
+
+/*!
  * \brief Checks if the property has a value set. (an empty string is still a valid value)
  * \return True when null.
  */

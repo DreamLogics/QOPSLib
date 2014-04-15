@@ -23,13 +23,29 @@
 #ifndef STYLESHEETWRITER_H
 #define STYLESHEETWRITER_H
 
+#include <QByteArray>
+#include "propsheet.h"
+
 namespace QOPS
 {
 
-class StylesheetWriter
+/*!
+ * \brief The %PropsheetWriter class is used to
+ */
+
+class PropsheetWriter
 {
 public:
-    StylesheetWriter();
+    PropsheetWriter();
+
+    QString toString(Propsheet &ps);
+    QByteArray toUtf8String(Propsheet &ps);
+
+    int getError() const;
+
+private:
+
+    int m_iErr;
 };
 
 }

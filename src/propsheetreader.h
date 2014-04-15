@@ -26,15 +26,15 @@
 #include "propsheet.h"
 #include <QByteArray>
 
-#define QOPS_NO_ERR 0
-#define QOPS_ERR_FILE 1 //could not open file
-#define QOPS_ERR_PARSE 2 //parsing error
-
 namespace QOPS
 {
 
 class InformationProvider;
 class PropsheetReaderPrivate;
+
+/*!
+ * \brief The %PropsheetReader class is used to parse an Object %Property Sheet document.
+ */
 
 class PropsheetReader
 {
@@ -43,7 +43,7 @@ public:
     PropsheetReader(PropsheetReader &ref);
     ~PropsheetReader();
 
-    Propsheet fromData(QByteArray &data) const;
+    Propsheet fromUtf8String(QByteArray &data) const;
     Propsheet fromString(QString str) const;
 
     int getError() const;

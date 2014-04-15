@@ -115,9 +115,9 @@ Table Propsheet::objectPropertyTable(QString id, QString ns) const
 }
 
 /*!
- * \brief Propsheet::addObjectPropertyTable
- * \param t
- * \param ns
+ * \brief Add an object %property %table to the %propsheet.
+ * \param t The %property %table.
+ * \param ns The namespace.
  */
 
 void Propsheet::addObjectPropertyTable(Table t, QString ns) const
@@ -132,17 +132,25 @@ void Propsheet::addObjectPropertyTable(Table t, QString ns) const
 
     t.m_p->pIP = m_p->pInformationProvider;
     QList<Property> props = t.m_p->pProps.values();
+#ifndef NO_SMART_POINTERS
     for (int i=0;i<props.size();i++)
         props[i].m_p->pIP = m_p->pInformationProvider;
-//TODO: maken voor NO_SMART_POITNER
+#else
+    for (int i=0;i<props.size();i++)
+    {
+        Property p = props[i];
+        p.m_p->pIP = m_p->pInformationProvider;
+        props[i] = p;
+    }
+#endif
 
 }
 
 /*!
- * \brief Propsheet::sequence
- * \param id
- * \param ns
- * \return
+ * \brief Get the %sequence named "id".
+ * \param id The id/name of the %sequence.
+ * \param ns The namespace.
+ * \return The %sequence.
  */
 
 Sequence Propsheet::sequence(QString id, QString ns) const
@@ -155,9 +163,9 @@ Sequence Propsheet::sequence(QString id, QString ns) const
 }
 
 /*!
- * \brief Propsheet::addSequence
- * \param seq
- * \param ns
+ * \brief Add a %property %sequence.
+ * \param seq The %sequence.
+ * \param ns The namespace.
  */
 
 void Propsheet::addSequence(Sequence seq, QString ns) const
@@ -173,10 +181,10 @@ void Propsheet::addSequence(Sequence seq, QString ns) const
 }
 
 /*!
- * \brief Propsheet::variable
- * \param varname
- * \param ns
- * \return
+ * \brief Get the variable "varname".
+ * \param varname The variable name.
+ * \param ns The namespace.
+ * \return The variable value as a string.
  */
 
 QString Propsheet::variable(QString varname, QString ns) const
@@ -189,10 +197,10 @@ QString Propsheet::variable(QString varname, QString ns) const
 }
 
 /*!
- * \brief Propsheet::setVariable
- * \param varname
- * \param value
- * \param ns
+ * \brief Set a variable value.
+ * \param varname The variable name.
+ * \param value The variable value.
+ * \param ns The namespace.
  */
 
 void Propsheet::setVariable(QString varname, QString value, QString ns) const

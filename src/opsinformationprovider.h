@@ -28,13 +28,40 @@
 namespace QOPS
 {
 
+/*!
+ * \brief The InformationProvider class provides an interface for retreiving
+ * application/system specific information.
+ */
+
 class InformationProvider
 {
 public:
     virtual ~InformationProvider() {}
 
-    virtual QString sysVarForObject(QString id, QString ns) = 0;
+    /*!
+     * \brief Get a system defined variable.
+     * \param varname The variable name.
+     * \param id The object ID.
+     * \param ns The namespace.
+     * \return Variable value as a string.
+     */
+    virtual QString sysVarForObject(QString varname, QString id, QString ns) = 0;
+
+    /*!
+     * \brief All values are passed trough this function, allowing the information
+     * provider to modify it if needed.
+     * \param prop The property name.
+     * \param value The current value.
+     * \param rule The property rule.
+     * \return New value as a string.
+     */
     virtual QString valueForProp(QString prop, QString value, QString rule) = 0;
+
+    /*!
+     * \brief This function handles importing of %property sheet documents.
+     * \param filename The file to import.
+     * \return Utf8 encoded string.
+     */
     virtual QByteArray importPropsheet(QString filename) = 0;
 };
 

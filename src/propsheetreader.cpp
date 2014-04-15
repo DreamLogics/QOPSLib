@@ -25,6 +25,7 @@
 #include "opsinformationprovider.h"
 #include <QList>
 #include <QRegExp>
+#include "qopslib.h"
 
 using namespace QOPS;
 
@@ -47,7 +48,7 @@ PropsheetReader::~PropsheetReader()
         delete m_p;
 }
 
-Propsheet PropsheetReader::fromData(QByteArray &data) const
+Propsheet PropsheetReader::fromUtf8String(QByteArray &data) const
 {
     Propsheet p;
     m_p->load(QString::fromUtf8(data),p);
@@ -414,10 +415,23 @@ void PropsheetReaderPrivate::parseProps(QString data, Table &table)
 
 void PropsheetReaderPrivate::parseVar(QString data, Propsheet &propsheet, QString ns)
 {
-
+    QRegExp varreg("([^=]+)=([.]+)");
+    if (varreg.indexIn(data) != -1)
+    {
+        propsheet.setVariable(varreg.cap(1),varreg.cap(2),ns);
+    }
 }
 
 void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
 {
+    /* obj_id
+     * {
+     *   1
+     *   {
+     *     test: 1;
+     *   }
+     * }
+     */
+
 
 }

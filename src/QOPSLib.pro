@@ -40,7 +40,8 @@ HEADERS +=\
     qopslib.h \
     sequence.h \
     propsheetreaderprivate.h \
-    tableprivate.h
+    tableprivate.h \
+    sequenceprivate.h
 
 unix {
     target.path = /usr/lib

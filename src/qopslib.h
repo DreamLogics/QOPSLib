@@ -25,4 +25,8 @@
  * (The copy methods will then be unavailable since they lost their purpose.)
  */
 
+#define QOPS_NO_ERR 0
+#define QOPS_ERR_FILE 1 //could not open file
+#define QOPS_ERR_PARSE 2 //parsing error
+
 #endif // QOPSLIB_H

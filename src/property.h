@@ -66,6 +66,8 @@ public:
 
     bool isNull() const;
 
+    int partCount() const;
+
     QString rule() const;
     void setRule(QString rule) const;
 
