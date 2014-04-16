@@ -84,6 +84,9 @@ QString PropsheetWriter::toString(Propsheet &ps)
                     doc += props[s] + ": ";
                     for (int r=0;r<p.partCount();r++)
                         doc += p.toString(r);
+                    doc += " ";
+                    for (int r=0;r<p.rules().size();r++)
+                        doc += p.rules()[r];
                     doc += ";\n";
                 }
 
@@ -92,11 +95,17 @@ QString PropsheetWriter::toString(Propsheet &ps)
         }
 
         //sequences
+        if (ps.m_p->objectPropTables.contains(ns[i]))
+        {
+
+        }
 
 
         if (i!=0)
             doc += "}\n";
     }
+
+    return doc;
 }
 
 /*!

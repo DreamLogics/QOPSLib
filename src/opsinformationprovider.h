@@ -24,6 +24,8 @@
 #define OSSINFORMATIONPROVIDER_H
 
 #include <QString>
+#include <QStringList>
+#include "valuetypes.h"
 
 namespace QOPS
 {
@@ -51,11 +53,12 @@ public:
      * \brief All values are passed trough this function, allowing the information
      * provider to modify it if needed.
      * \param prop The property name.
-     * \param value The current value.
-     * \param rule The property rule.
+     * \param value The current property value.
+     * \param index The property index.
+     * \param rules The property rules.
      * \return New value as a string.
      */
-    virtual QString valueForProp(QString prop, QString value, QString rule) = 0;
+    virtual QString valueForProp(QString prop, QString value, int index, QStringList rules) = 0;
 
     /*!
      * \brief This function handles importing of %property sheet documents.
@@ -63,6 +66,17 @@ public:
      * \return Utf8 encoded string.
      */
     virtual QByteArray importPropsheet(QString filename) = 0;
+
+    /*!
+     * \brief Give the value type for the given property.
+     * \param prop The property name.
+     * \param value The current property value.
+     * \param index The property index.
+     * \param rules The property rules.
+     * \return Returns a ValueType.
+     */
+
+    virtual ValueType valueTypeForProp(QString prop, QString value, int index, QStringList rules) = 0;
 };
 
 }

@@ -22,7 +22,9 @@ private:
         mode_in_seq,
         mode_in_ns,
         mode_in_atrule,
-        mode_literal
+        mode_literal,
+        mode_in_frame,
+        mode_in_obj
     };
 
     void load(QString data, Propsheet &propsheet);
@@ -32,7 +34,6 @@ private:
     void parseSeq(QString data, Sequence &seq);
 
 
-    int iRefCount;
     int iErrorCode;
     InformationProvider *pIP;
 

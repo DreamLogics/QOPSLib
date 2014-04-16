@@ -25,7 +25,6 @@
 #include "opsinformationprovider.h"
 #include "propsheet.h"
 
-
 using namespace QOPS;
 
 Property::Property(QString name)
@@ -39,7 +38,7 @@ Property::Property()
     m_p = new PropertyPrivate();
 }
 
-Property::Property(Property &ref)
+Property::Property(const Property &ref)
 {
 #ifndef NO_SMART_POINTERS
     m_p = ref.m_p;
@@ -74,7 +73,7 @@ Property Property::copy() const
 {
     Property p(m_sName);
     p.m_p->bIsNull = m_p->bIsNull;
-    p.m_p->sRule = m_p->sRule;
+    p.m_p->sRules = m_p->sRules;
     p.m_p->sValues = m_p->sValues;
     p.m_sName = m_sName;
     return p;
@@ -152,7 +151,7 @@ QString Property::toString(int index) const
     if (!m_p->sValues.contains(index))
         return QString();
     if (m_p->pIP)
-        return m_p->pIP->valueForProp(m_sName,m_p->sValues[index],m_p->sRule);
+        return m_p->pIP->valueForProp(m_sName,m_p->sValues[index],index,m_p->sRules);
     return m_p->sValues[index];
 }
 
@@ -213,23 +212,61 @@ bool Property::isNull() const
 }
 
 /*!
- * \brief Gives the property rule.
- * \return Property rule as a string.
+ * \brief Gives the property rules.
+ * \return Property rules as a QStringList.
  */
 
-QString Property::rule() const
+QStringList Property::rules() const
 {
-    return m_p->sRule;
+    return m_p->sRules;
 }
 
 /*!
- * \brief Sets the property rule.
+ * \brief Checks if the property has the given rule.
+ * \param rule The rule to check for.
+ * \return True if the property has the rule.
+ */
+
+bool Property::hasRule(QString rule) const
+{
+    return m_p->sRules.contains(rule);
+}
+
+/*!
+ * \brief Adds a property rule.
  * \param rule The propery rule as a string.
  */
 
-void Property::setRule(QString rule) const
+void Property::addRule(QString rule) const
 {
-    m_p->sRule = rule;
+    if (m_p->sRules.contains(rule))
+        return;
+    m_p->sRules.append(rule);
+}
+
+/*!
+ * \brief Removes the rule from the property.
+ * \param rule The rule to remove.
+ */
+
+void Property::removeRule(QString rule) const
+{
+    m_p->sRules.removeAll(rule);
+}
+
+/*!
+ * \brief The ValueType for the property. If no InformationProvider is used, vtString is returned. Returns vtUndefined when an invalid index is provided.
+ * \param index If the property has a multipart value, use the index to target the correct part. Omit for singlepart values.
+ * \return Value type as ValueType.
+ */
+
+ValueType Property::valueType(int index) const
+{
+    if (!m_p->sValues.contains(index))
+        return vtUndefined;
+    if (m_p->pIP)
+        return m_p->pIP->valueTypeForProp(m_sName,m_p->sValues[index],index,m_p->sRules);
+    return vtString;
 }
 
 #ifdef USE_GUI
@@ -257,7 +294,7 @@ QColor Property::toColor(int index) const
     QRegExp rgbareg("rgba\\(([0-9]+),([0-9]+),([0-9]+),([0-9]+)\\)");
     QRegExp rgbreg("rgb\\(([0-9]+),([0-9]+),([0-9]+)\\)");
     QString val = toString(index);
-    QColor c();
+    QColor c;
     if (rgbareg.indexIn(val) != -1)
     {
         c.setRed(rgbareg.cap(1).toInt());

@@ -32,7 +32,7 @@ Table::Table()
     m_p = new TablePrivate();
 }
 
-Table::Table(Table &ref)
+Table::Table(const Table &ref)
 {
 #ifndef NO_SMART_POINTERS
     m_p = ref.m_p;
@@ -75,7 +75,7 @@ Table Table::copy() const
     QList<QString> keys = m_p->pProps.keys();
     //copy all props
     for (int i=0;i<keys.size();i++)
-        t.addProperty(m_p->pProps[keys[i]].name(),m_p->pProps[keys[i]].copy());
+        t.addProperty(m_p->pProps[keys[i]].copy());
 
     return t;
 }
@@ -135,7 +135,7 @@ bool Table::operator ==(const Table& other)
 }
 
 #ifndef NO_SMART_POINTERS
-Property& Table::operator=(const Table &ref)
+Table& Table::operator=(const Table &ref)
 {
     if (--m_p->iRefCount <= 0)
         delete m_p;

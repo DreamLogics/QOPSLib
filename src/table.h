@@ -40,7 +40,7 @@ class Table
 {
 public:
     Table();
-    Table(Table &ref);
+    Table(const Table &ref);
     Table(QString name);
     ~Table();
 #ifndef NO_SMART_POINTERS
@@ -53,15 +53,18 @@ public:
     void removeProperty(QString name) const;
 
 
-    virtual bool operator==(const Property&);
+    virtual bool operator==(const Table&);
 #ifndef NO_SMART_POINTERS
-    virtual Property& operator=(const Property&);
+    virtual Table& operator=(const Table&);
 #endif
 
 private:
 
     TablePrivate *m_p;
     QString m_sName;
+
+    friend class Propsheet;
+    friend class PropsheetWriter;
 
 };
 }

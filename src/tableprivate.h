@@ -46,6 +46,7 @@ private:
 
     friend class Table;
     friend class Propsheet;
+    friend class PropsheetWriter;
 };
 
 }

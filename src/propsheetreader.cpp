@@ -26,11 +26,12 @@
 #include <QList>
 #include <QRegExp>
 #include "qopslib.h"
+#include <QDebug>
 
 using namespace QOPS;
 
 
-PropsheetReader::PropsheetReader(InformationProvider *ip=0)
+PropsheetReader::PropsheetReader(InformationProvider *ip)
 {
     m_p = new PropsheetReaderPrivate();
     m_p->pIP = ip;
@@ -38,14 +39,13 @@ PropsheetReader::PropsheetReader(InformationProvider *ip=0)
 
 PropsheetReader::PropsheetReader(PropsheetReader &ref)
 {
-    m_p = ref.m_p;
-    m_p->iRefCount++;
+    m_p = new PropsheetReaderPrivate();
+    m_p->pIP = ref.m_p->pIP;
 }
 
 PropsheetReader::~PropsheetReader()
 {
-    if (--m_p->iRefCount <= 0)
-        delete m_p;
+    delete m_p;
 }
 
 Propsheet PropsheetReader::fromUtf8String(QByteArray &data) const
@@ -70,7 +70,7 @@ int PropsheetReader::getError() const
  * Private Impl.
  */
 
-PropsheetReaderPrivate::PropsheetReaderPrivate()
+PropsheetReaderPrivate::PropsheetReaderPrivate() : pIP(0), iErrorCode(QOPS_NO_ERR)
 {
 
 }
@@ -163,12 +163,14 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
         {
             if (c == '$') // variable
             {
+                qDebug() << "Variable found.";
                 pmode.push_front(cmode);
                 cmode = mode_in_var;
                 temp = "";
             }
             else if (c == '@') // at-rule
             {
+                qDebug() << "@ rule found.";
                 pmode.push_front(cmode);
                 cmode = mode_in_atrule;
                 temp = "";
@@ -180,10 +182,12 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             }
             else if (c == '{') // not in at-rule, must be prop table
             {
+                qDebug() << "object prop table found" << temp;
                 //object prop table found
-                table = Table();
                 temp.replace(" ","");
-                propsheet.addObjectPropertyTable(temp,table);
+                table = Table(temp);
+                temp="";
+                propsheet.addObjectPropertyTable(table);
                 pmode.push_front(cmode);
                 cmode = mode_in_objproptable;
             }
@@ -201,12 +205,13 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             }
             else if (c == '}') // prop table closing tag found, parse props and go back to previous level
             {
+                qDebug() << "end of prop table";
                 parseProps(temp,table);
                 temp = "";
                 cmode = pmode.front();
                 pmode.pop_front();
             }
-            else if (c == '{') // prop table can't contain {, error
+            else if (c == '{') // prop table should not contain {, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
                 return;
@@ -247,10 +252,12 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             }
             else if (c == '{') // not in at-rule, must be prop table
             {
+                qDebug() << "prop table in namespace" << ns << temp;
                 //object prop table found
                 temp.replace(" ","");
                 table = Table(temp);
-                propsheet.addObjectPropertyTable(temp,table);
+                temp="";
+                propsheet.addObjectPropertyTable(table,ns);
                 pmode.push_front(cmode);
                 cmode = mode_in_objproptable;
             }
@@ -274,6 +281,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
 
             if (level == 0) // last } found, parse sequence
             {
+                qDebug() << "sequence found" << name;
                 QRegExp seqreg("([^\\()]+)\\(([0-9]+),([0-9]+)\\)");
                 name.replace(" ","");
                 if (seqreg.indexIn(name) == -1)
@@ -283,7 +291,9 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
                 }
                 seq = Sequence(seqreg.cap(1),seqreg.cap(2).toInt(),seqreg.cap(3).toInt());
                 parseSeq(temp,seq);
-                propsheet.addSequence(seqreg.cap(1),seq,ns);
+                if (iErrorCode == QOPS_ERR_PARSE)
+                    return;
+                propsheet.addSequence(seq,ns);
 
                 cmode = pmode.front();
                 pmode.pop_front();
@@ -298,7 +308,8 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             {
                 // temp should be "var_name=value"
                 parseVar(temp,propsheet,ns);
-                cmode = pmode;
+                cmode = pmode.front();
+                pmode.pop_front();
             }
             else
                 temp += c;
@@ -347,10 +358,10 @@ void PropsheetReaderPrivate::parseProps(QString data, Table &table)
 {
     QRegExp propreg("([^:]+):([^;]+);");
     QRegExp cleanspaces("(^ +| +$)");
-    QRegExp proprulereg("!([a-zA-Z]+)$");
+    QRegExp proprulereg("!([a-zA-Z_-]+)");
     int n;
     int off = 0;
-    QString name,value,proprule;
+    QString name,value;
 
 
     while ((n = propreg.indexIn(data,off)) != -1)
@@ -360,12 +371,25 @@ void PropsheetReaderPrivate::parseProps(QString data, Table &table)
         Property prop(name);
 
         value = propreg.cap(2).replace(cleanspaces,"");
-        if (proprulereg.indexIn(value) != -1)
+        /*if (proprulereg.indexIn(value) != -1)
         {
             proprule = proprulereg.cap(1);
             value = value.left(value.size()-proprulereg.cap(0).size()).replace(cleanspaces,"");
             prop.setRule(proprule);
+        }*/
+        int firstrule = -1;
+        int in;
+        int offr=0;
+        while ((in=proprulereg.indexIn(value,offr)) != -1) // retrieve !rule rules
+        {
+            if (firstrule == -1)
+                firstrule = in;
+            prop.addRule(proprulereg.cap(1));
+            offr = in + proprulereg.cap(0).size();
         }
+
+        if (firstrule != -1)
+            value = value.left(firstrule).replace(cleanspaces,"");
 
         prop.setValue(value);
 
@@ -408,6 +432,8 @@ void PropsheetReaderPrivate::parseProps(QString data, Table &table)
             part += value[i];
         }
 
+        table.addProperty(prop);
+
 
         off = n + propreg.cap(0).size();
     }
@@ -432,6 +458,114 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
      *   }
      * }
      */
+    QString temp;
+    QString object;
+    int frame;
+    mode cmode = mode_base;
+    QList<mode> pmode;
 
+    for (int i=0;i<data.size();i++)
+    {
+        QChar c = data[i];
 
+        if (cmode == mode_base)
+        {
+            if (c == '{')
+            {
+                //now getting the frames
+                //temp == object id
+                object = temp;
+                temp = "";
+                pmode.push_front(cmode);
+                cmode = mode_in_obj;
+            }
+            else if (c == '}')
+            {
+                iErrorCode = QOPS_ERR_PARSE;
+                return;
+            }
+            else
+                temp += c;
+
+        }
+        else if (cmode == mode_in_obj)
+        {
+            if (c == '{')
+            {
+                //found frame
+                frame = temp.toInt();
+                if (frame < seq.startIndex() || frame > seq.endIndex())
+                {
+                    //frame out of range
+                    iErrorCode = QOPS_ERR_PARSE;
+                    return;
+                }
+                temp = "";
+                pmode.push_front(cmode);
+                cmode = mode_in_frame;
+            }
+            else if (c == '}')
+            {
+                //end of object
+                cmode = pmode.front();
+                pmode.pop_front();
+            }
+            else
+                temp += c;
+        }
+        else if (cmode == mode_in_frame)
+        {
+            if (c == '"')
+            {
+                pmode.push_front(cmode);
+                cmode = mode_literal;
+                temp += c;
+            }
+            else if (c == '}')
+            {
+                //end of frame
+                Table tbl(QString::number(frame));
+                parseProps(temp,tbl);
+                seq.setFrame(object,frame,tbl);
+                cmode = pmode.front();
+                pmode.pop_front();
+                temp = "";
+            }
+            else if (c == '{')
+            {
+                iErrorCode = QOPS_ERR_PARSE;
+                return;
+            }
+        }
+        else if (cmode == mode_literal)
+        {
+            if (c == '"')
+            {
+                cmode = pmode.front();
+                pmode.pop_front();
+            }
+            temp += c;
+        }
+        else
+            temp += c;
+    }
+
+}
+
+void PropsheetReaderPrivate::import(QString &data)
+{
+    //TODO: search backwards to omit the need for a copy of data?
+
+    QRegExp importrule("@import +([^;]+);");
+    QString temp=data;
+    int i,off=0;
+
+    while ((i=importrule.indexIn(temp,off)) != -1)
+    {
+        if (pIP)
+            data.replace(importrule.cap(0),QString::fromUtf8(pIP->importPropsheet(importrule.cap(1))));
+        else
+            data.replace(importrule.cap(0),"");
+        off = i + importrule.cap(0).size();
+    }
 }

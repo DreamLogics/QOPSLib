@@ -43,7 +43,7 @@ class Propsheet
 {
 public:
     Propsheet(InformationProvider *ip=0);
-    Propsheet(Propsheet &ref);
+    Propsheet(const Propsheet &ref);
     ~Propsheet();
 
 #ifndef NO_SMART_POINTERS
@@ -66,6 +66,8 @@ public:
 private:
 
     PropsheetPrivate *m_p;
+
+    friend class PropsheetWriter;
 
 };
 

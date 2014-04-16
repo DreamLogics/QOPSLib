@@ -28,23 +28,56 @@ using namespace QOPS;
 
 Sequence::Sequence(QString name, int start, int end)
 {
-
+    m_sName = name;
+    m_p = new SequencePrivate();
+    m_p->iStart = start;
+    m_p->iEnd = end;
 }
 
-Sequence::Sequence(Sequence &ref)
+Sequence::Sequence(const Sequence &ref)
 {
-
+#ifndef NO_SMART_POINTERS
+    m_p = ref.m_p;
+    m_sName = ref.m_sName;
+    m_p->iRefCount++;
+#else
+    m_p = new SequencePrivate();
+    m_p->frames = ref.m_p->frames;
+    m_p->iStart = ref.m_p->iStart;
+    m_p->iEnd = ref.m_p->iEnd;
+    m_sName = ref.m_sName;
+#endif
 }
 
 Sequence::Sequence()
 {
-
+    m_p = new SequencePrivate();
 }
 
 Sequence::~Sequence()
 {
-
+    if ((--m_p->iRefCount) <= 0)
+        delete m_p;
 }
+
+/*!
+ * \brief Give the name of the sequence.
+ * \return Name as QString.
+ */
+
+QString Sequence::name() const
+{
+    return m_sName;
+}
+
+#ifndef NO_SMART_POINTERS
+Sequence Sequence::copy() const
+{
+    Sequence s(m_sName,m_p->iStart,m_p->iEnd);
+    s.m_p->frames = m_p->frames;
+    return s;
+}
+#endif
 
 /*!
  * \brief Start of the range.
@@ -117,15 +150,36 @@ Table Sequence::frame(QString object_id, int frame_index) const
 
 void Sequence::setFrame(QString object_id, int index, Table frame) const
 {
+    if (!m_p->frames.contains(object_id))
+        m_p->frames.insert(object_id,QMap<int,Table>());
+    if (!m_p->frames[object_id].contains(index))
+        m_p->frames[object_id].insert(index,frame);
     m_p->frames[object_id][index] = frame;
 }
 
+bool Sequence::operator==(const Sequence&)
+{
+
+}
+
+#ifndef NO_SMART_POINTERS
+Sequence& Sequence::operator=(const Sequence &other)
+{
+    if (--m_p->iRefCount <= 0)
+        delete m_p;
+    m_p = other.m_p;
+    m_sName = other.m_sName;
+    m_p->iRefCount++;
+    return *this;
+}
+
+#endif
 
 /*
  * Private Impl.
  */
 
-SequencePrivate::SequencePrivate() : iRefCount(1)
+SequencePrivate::SequencePrivate() : iRefCount(1), iStart(0), iEnd(0)
 {
 
 }
@@ -140,7 +194,7 @@ Table SequencePrivate::frame(QString id, int i)
 
     for (int n=i;n>=iStart;n--)
     {
-        if (frames[id.contains(n)])
+        if (frames[id].contains(n))
         {
             from = n;
             break;
@@ -149,7 +203,7 @@ Table SequencePrivate::frame(QString id, int i)
 
     for (int n=i;n<=iEnd;n++)
     {
-        if (frames[id.contains(n)])
+        if (frames[id].contains(n))
         {
             to = n;
             break;

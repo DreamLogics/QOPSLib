@@ -52,6 +52,7 @@ private:
 
     friend class Propsheet;
     friend class PropsheetReader;
+    friend class PropsheetWriter;
 };
 
 }

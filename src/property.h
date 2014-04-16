@@ -24,6 +24,7 @@
 #define PROPERTY_H
 
 #include <QString>
+#include "valuetypes.h"
 
 #ifdef USE_GUI
 #include <QColor>
@@ -45,7 +46,7 @@ class Property
 public:
     Property(QString name);
     Property();
-    Property(Property &ref);
+    Property(const Property &ref);
     ~Property();
 
 #ifndef NO_SMART_POINTERS
@@ -68,8 +69,12 @@ public:
 
     int partCount() const;
 
-    QString rule() const;
-    void setRule(QString rule) const;
+    QStringList rules() const;
+    bool hasRule(QString rule) const;
+    void addRule(QString rule) const;
+    void removeRule(QString rule) const;
+
+    ValueType valueType(int index=0) const;
 
 #ifdef USE_GUI
     void setValue(QColor val, int index=0) const;

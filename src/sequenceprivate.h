@@ -22,6 +22,9 @@ private:
     Table frame(QString id,int i);
 
     QMap<QString, QMap<int,Table> > frames;
+
+    friend class Sequence;
+    friend class PropsheetWriter;
 };
 
 }

@@ -24,6 +24,7 @@
 #define PROPERTYPRIVATE_H
 
 #include <QString>
+#include <QStringList>
 #include <QMap>
 
 namespace QOPS
@@ -41,7 +42,7 @@ private:
     int iRefCount;
 #endif
     QMap<int,QString> sValues;
-    QString sRule;
+    QStringList sRules;
     bool bIsNull;
 
     InformationProvider *pIP;

@@ -6,6 +6,7 @@
 #include <propsheetwriter.h>
 #include <table.h>
 #include <property.h>
+#include <valuetypes.h>
 
 /*! \mainpage Object Property Sheet Library
  *

@@ -40,18 +40,29 @@ class Sequence
 {
 public:
     Sequence(QString name, int start, int end);
-    Sequence(Sequence &ref);
+    Sequence(const Sequence &ref);
     Sequence();
     ~Sequence();
 
+    QString name() const;
+
     int startIndex() const;
     int endIndex() const;
+
+#ifndef NO_SMART_POINTERS
+    Sequence copy() const;
+#endif
 
     Table startFrame(QString object_id) const;
     Table endFrame(QString object_id) const;
     Table frame(QString object_id, int frame_index) const;
 
     void setFrame(QString object_id, int index, Table frame) const;
+
+    virtual bool operator==(const Sequence&);
+#ifndef NO_SMART_POINTERS
+    virtual Sequence& operator=(const Sequence&);
+#endif
 
 private:
 
