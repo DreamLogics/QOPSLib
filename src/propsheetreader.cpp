@@ -30,6 +30,11 @@
 
 using namespace QOPS;
 
+/*
+ * TODO:
+ * -linecount per file (@import)
+ */
+
 
 PropsheetReader::PropsheetReader(InformationProvider *ip)
 {
@@ -48,12 +53,25 @@ PropsheetReader::~PropsheetReader()
     delete m_p;
 }
 
+/*!
+ * \brief Read an Object %Property Sheet from an Utf8 String.
+ * \param data Utf8 encoded data as QByteArray.
+ * \return The generated Propsheet.
+ */
+
 Propsheet PropsheetReader::fromUtf8String(QByteArray &data) const
 {
     Propsheet p;
     m_p->load(QString::fromUtf8(data),p);
     return p;
 }
+
+/*!
+ * \brief Read an Object %Property Sheet from a QString.
+ * \param str Data as QString.
+ * \return The generated Propsheet.
+ */
+
 Propsheet PropsheetReader::fromString(QString str) const
 {
     Propsheet p;
@@ -61,9 +79,24 @@ Propsheet PropsheetReader::fromString(QString str) const
     return p;
 }
 
+/*!
+ * \brief Retreive the error code.
+ * \return Value is QOPS_NO_ERR if there is no error.
+ */
+
 int PropsheetReader::getError() const
 {
     return m_p->iErrorCode;
+}
+
+/*!
+ * \brief Give the error message if there was an error.
+ * \return Error message as string.
+ */
+
+QString PropsheetReader::getErrorMsg() const
+{
+    return m_p->sErrorMsg;
 }
 
 /*
@@ -131,12 +164,13 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
     if (level != 0) //too few or too many brackets
     {
         iErrorCode = QOPS_ERR_PARSE;
+        sErrorMsg = "Incorrect bracket count.";
         return;
     }
 
     data = nd;
 
-    data.replace(QRegExp("[\n\r\t]+"),"");
+    //data.replace(QRegExp("[\n\r\t]+"),"");
 
     if (pIP)
     {
@@ -152,6 +186,8 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
     Table table;
     Sequence seq;
 
+    QRegExp spaces("[ \t\r\n]+");
+
     mode cmode = mode_base;
     //mode pmode;
     QList<mode> pmode;
@@ -163,14 +199,26 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
         {
             if (c == '$') // variable
             {
-                qDebug() << "Variable found.";
+                temp.replace(spaces,"");
+                if (temp != "")
+                {
+                    iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Invalid input before variable. On line: "+QString::number(countLines(data,i));
+                    return;
+                }
                 pmode.push_front(cmode);
                 cmode = mode_in_var;
                 temp = "";
             }
             else if (c == '@') // at-rule
             {
-                qDebug() << "@ rule found.";
+                temp.replace(spaces,"");
+                if (temp != "")
+                {
+                    iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Invalid input before @-rule. On line: "+QString::number(countLines(data,i));
+                    return;
+                }
                 pmode.push_front(cmode);
                 cmode = mode_in_atrule;
                 temp = "";
@@ -178,13 +226,13 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             else if (c == '}') // } found before {, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
+                sErrorMsg = "Found closing bracket before an opening bracket. On line: "+QString::number(countLines(data,i));
                 return;
             }
             else if (c == '{') // not in at-rule, must be prop table
             {
-                qDebug() << "object prop table found" << temp;
                 //object prop table found
-                temp.replace(" ","");
+                temp.replace(spaces,"");
                 table = Table(temp);
                 temp="";
                 propsheet.addObjectPropertyTable(table);
@@ -205,8 +253,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             }
             else if (c == '}') // prop table closing tag found, parse props and go back to previous level
             {
-                qDebug() << "end of prop table";
-                parseProps(temp,table);
+                parseProps(temp,table,countLines(data,i-temp.size()));
                 temp = "";
                 cmode = pmode.front();
                 pmode.pop_front();
@@ -214,6 +261,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             else if (c == '{') // prop table should not contain {, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
+                sErrorMsg = "Found opening bracket in a property table. On line: "+QString::number(countLines(data,i));
                 return;
             }
             else
@@ -252,9 +300,8 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             }
             else if (c == '{') // not in at-rule, must be prop table
             {
-                qDebug() << "prop table in namespace" << ns << temp;
                 //object prop table found
-                temp.replace(" ","");
+                temp.replace(spaces,"");
                 table = Table(temp);
                 temp="";
                 propsheet.addObjectPropertyTable(table,ns);
@@ -281,16 +328,16 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
 
             if (level == 0) // last } found, parse sequence
             {
-                qDebug() << "sequence found" << name;
-                QRegExp seqreg("([^\\()]+)\\(([0-9]+),([0-9]+)\\)");
-                name.replace(" ","");
+                QRegExp seqreg("([^\\()]+)\\(([0-9-]+),([0-9-]+)\\)");
+                name.replace(spaces,"");
                 if (seqreg.indexIn(name) == -1)
                 {
                     iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Invalid sequence identifier. On line: "+QString::number(countLines(data,i));
                     return;
                 }
                 seq = Sequence(seqreg.cap(1),seqreg.cap(2).toInt(),seqreg.cap(3).toInt());
-                parseSeq(temp,seq);
+                parseSeq(temp,seq,countLines(data,i-temp.size()));
                 if (iErrorCode == QOPS_ERR_PARSE)
                     return;
                 propsheet.addSequence(seq,ns);
@@ -320,7 +367,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             {
                 if (temp.startsWith("namespace"))
                 {
-                    temp.replace(" ","");
+                    temp.replace(spaces,"");
                     temp = temp.mid(9);
                     ns = temp;
                     temp = "";
@@ -329,7 +376,7 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
                 else if (temp.startsWith("sequence"))
                 {
                     level = 1;
-                    temp.replace(" ","");
+                    temp.replace(spaces,"");
                     temp = temp.mid(8);
                     name = temp;
                     temp = "";
@@ -338,12 +385,14 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
                 else
                 {
                     iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Invalid @-rule type. On line: "+QString::number(countLines(data,i));
                     return;
                 }
             }
             else if (c == '}') // the at-rule block ended without starting, error
             {
                 iErrorCode = QOPS_ERR_PARSE;
+                sErrorMsg = "{ expected on line: "+QString::number(countLines(data,i));
                 return;
             }
             else
@@ -354,10 +403,10 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
 
 }
 
-void PropsheetReaderPrivate::parseProps(QString data, Table &table)
+void PropsheetReaderPrivate::parseProps(QString data, Table &table, int lines)
 {
     QRegExp propreg("([^:]+):([^;]+);");
-    QRegExp cleanspaces("(^ +| +$)");
+    QRegExp cleanspaces("(^[ \t\r\n]+|[ \t\r\n]+$)");
     QRegExp proprulereg("!([a-zA-Z_-]+)");
     int n;
     int off = 0;
@@ -448,7 +497,7 @@ void PropsheetReaderPrivate::parseVar(QString data, Propsheet &propsheet, QStrin
     }
 }
 
-void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
+void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq, int lines)
 {
     /* obj_id
      * {
@@ -458,11 +507,15 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
      *   }
      * }
      */
+    QRegExp cleanspaces("(^[ \t\r\n]+|[ \t\r\n]+$)");
     QString temp;
     QString object;
     int frame;
     mode cmode = mode_base;
     QList<mode> pmode;
+    QRegExp framereg("^[0-9-]+$");
+
+    lines--;
 
     for (int i=0;i<data.size();i++)
     {
@@ -474,7 +527,7 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
             {
                 //now getting the frames
                 //temp == object id
-                object = temp;
+                object = temp.replace(cleanspaces,"");
                 temp = "";
                 pmode.push_front(cmode);
                 cmode = mode_in_obj;
@@ -482,6 +535,7 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
             else if (c == '}')
             {
                 iErrorCode = QOPS_ERR_PARSE;
+                sErrorMsg = "Found closing bracket before an opening bracket. On line: "+QString::number(countLines(data,i)+lines);
                 return;
             }
             else
@@ -493,11 +547,20 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
             if (c == '{')
             {
                 //found frame
+                temp.replace(cleanspaces,"");
+                if (framereg.indexIn(temp) == -1)
+                {
+                    //invalid frame id
+                    iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Invalid frame identifier. Must be a number. On line: "+QString::number(countLines(data,i)+lines);
+                    return;
+                }
                 frame = temp.toInt();
                 if (frame < seq.startIndex() || frame > seq.endIndex())
                 {
                     //frame out of range
                     iErrorCode = QOPS_ERR_PARSE;
+                    sErrorMsg = "Frame "+temp+" is out of range. Range is "+QString::number(seq.startIndex())+" to "+QString::number(seq.endIndex())+". On line: "+QString::number(countLines(data,i)+lines);
                     return;
                 }
                 temp = "";
@@ -525,7 +588,7 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
             {
                 //end of frame
                 Table tbl(QString::number(frame));
-                parseProps(temp,tbl);
+                parseProps(temp,tbl,(countLines(data,i) + lines));
                 seq.setFrame(object,frame,tbl);
                 cmode = pmode.front();
                 pmode.pop_front();
@@ -534,8 +597,11 @@ void PropsheetReaderPrivate::parseSeq(QString data, Sequence &seq)
             else if (c == '{')
             {
                 iErrorCode = QOPS_ERR_PARSE;
+                sErrorMsg = "Found opening bracket in a property table. On line: "+QString::number(countLines(data,i)+lines);
                 return;
             }
+            else
+                temp += c;
         }
         else if (cmode == mode_literal)
         {
@@ -568,4 +634,20 @@ void PropsheetReaderPrivate::import(QString &data)
             data.replace(importrule.cap(0),"");
         off = i + importrule.cap(0).size();
     }
+}
+
+int PropsheetReaderPrivate::countLines(QString &data, int end)
+{
+    int count = 1;
+    QChar c,p='\0';
+
+    for (int i=0;i<end;i++)
+    {
+        c = data[i];
+        if ((c == '\n' && p != '\r') || c == '\r')
+            count++;
+        p=c;
+    }
+
+    return count;
 }

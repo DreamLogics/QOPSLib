@@ -106,7 +106,7 @@ Table Propsheet::objectPropertyTable(QString id, QString ns) const
         return Table();
     if (!m_p->objectPropTables[ns].contains(id))
         return Table();
-    m_p->objectPropTables[ns][id];
+    return m_p->objectPropTables[ns][id];
 }
 
 /*!
@@ -154,7 +154,7 @@ Sequence Propsheet::sequence(QString id, QString ns) const
         return Sequence();
     if (!m_p->sequences[ns].contains(id))
         return Sequence();
-    m_p->sequences[ns][id];
+    return m_p->sequences[ns][id];
 }
 
 /*!
@@ -188,7 +188,7 @@ QString Propsheet::variable(QString varname, QString ns) const
         return QString();
     if (!m_p->variables[ns].contains(varname))
         return QString();
-    m_p->variables[ns][varname];
+    return m_p->variables[ns][varname];
 }
 
 /*!

@@ -26,6 +26,7 @@
 #include <QString>
 #include "table.h"
 #include "sequence.h"
+#include "qopslib_global.h"
 
 namespace QOPS
 {
@@ -39,7 +40,7 @@ class InformationProvider;
  * %Property sheets contain object %property %tables, %property sequences and variables.
  */
 
-class Propsheet
+class QOPSLIBSHARED_EXPORT Propsheet
 {
 public:
     Propsheet(InformationProvider *ip=0);

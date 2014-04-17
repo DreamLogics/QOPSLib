@@ -71,6 +71,10 @@ QString Sequence::name() const
 }
 
 #ifndef NO_SMART_POINTERS
+/*!
+ * \brief Create a copy of the current %sequence.
+ * \return Copy of the current sequence.
+ */
 Sequence Sequence::copy() const
 {
     Sequence s(m_sName,m_p->iStart,m_p->iEnd);

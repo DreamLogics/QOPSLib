@@ -18,16 +18,18 @@
  *
  * \section install_sec Installation
  *
- * Use ./configure to configure then make.
+ * Use "qmake" in src/ to create the makefiles then "make".
+ * "make install" will install into /usr/local/lib/ and /usr/local/include/QOPSLib/
  *
  * \section smart_pointer Smart Pointers
  *
- * By default the Propsheet, Table and Property classes are made as smart pointers. To disable this behaviour configure with --NO_SMART_POINTERS.
+ * By default the Propsheet, Table, Sequence and Property classes are made as smart pointers. To disable this behaviour add the NO_SMART_POINTERS define.
  * (The copy methods will then be unavailable since they lost their purpose.)
+ *
+ * qmake "DEFINES += NO_SMART_POINTERS"
  */
 
 #define QOPS_NO_ERR 0
-#define QOPS_ERR_FILE 1 //could not open file
-#define QOPS_ERR_PARSE 2 //parsing error
+#define QOPS_ERR_PARSE 1 //parsing error
 
 #endif // QOPSLIB_H

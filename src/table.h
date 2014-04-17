@@ -25,6 +25,7 @@
 
 #include <QString>
 #include "property.h"
+#include "qopslib_global.h"
 
 namespace QOPS
 {
@@ -36,7 +37,7 @@ class TablePrivate;
  * \brief %Property table class.
  */
 
-class Table
+class QOPSLIBSHARED_EXPORT Table
 {
 public:
     Table();

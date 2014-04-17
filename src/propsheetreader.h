@@ -25,6 +25,7 @@
 
 #include "propsheet.h"
 #include <QByteArray>
+#include "qopslib_global.h"
 
 namespace QOPS
 {
@@ -36,7 +37,7 @@ class PropsheetReaderPrivate;
  * \brief The %PropsheetReader class is used to parse an Object %Property Sheet document.
  */
 
-class PropsheetReader
+class QOPSLIBSHARED_EXPORT PropsheetReader
 {
 public:
     PropsheetReader(InformationProvider *ip=0);
@@ -47,6 +48,7 @@ public:
     Propsheet fromString(QString str) const;
 
     int getError() const;
+    QString getErrorMsg() const;
 
 private:
 

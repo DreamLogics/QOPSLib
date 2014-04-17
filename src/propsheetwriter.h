@@ -25,6 +25,7 @@
 
 #include <QByteArray>
 #include "propsheet.h"
+#include "qopslib_global.h"
 
 namespace QOPS
 {
@@ -33,7 +34,7 @@ namespace QOPS
  * \brief The %PropsheetWriter class is used to
  */
 
-class PropsheetWriter
+class QOPSLIBSHARED_EXPORT PropsheetWriter
 {
 public:
     PropsheetWriter();

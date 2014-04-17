@@ -29,12 +29,15 @@ private:
 
     void load(QString data, Propsheet &propsheet);
     void import(QString &data);
-    void parseProps(QString data, Table &table);
+    void parseProps(QString data, Table &table, int lines);
     void parseVar(QString data, Propsheet &propsheet, QString ns);
-    void parseSeq(QString data, Sequence &seq);
+    void parseSeq(QString data, Sequence &seq, int lines);
 
+    int countLines(QString &data, int end);
 
     int iErrorCode;
+    QString sErrorMsg;
+
     InformationProvider *pIP;
 
     friend class PropsheetReader;

@@ -25,6 +25,7 @@
 
 #include <QString>
 #include "valuetypes.h"
+#include "qopslib_global.h"
 
 #ifdef USE_GUI
 #include <QColor>
@@ -41,7 +42,7 @@ class PropertyPrivate;
  * Object properties can either be singlepart or multipart.
  */
 
-class Property
+class QOPSLIBSHARED_EXPORT Property
 {
 public:
     Property(QString name);

@@ -25,6 +25,7 @@
 
 #include <QString>
 #include "table.h"
+#include "qopslib_global.h"
 
 namespace QOPS
 {
@@ -36,7 +37,7 @@ class SequencePrivate;
  * be used as animations or as a way to represent multiple object states.
  */
 
-class Sequence
+class QOPSLIBSHARED_EXPORT Sequence
 {
 public:
     Sequence(QString name, int start, int end);
@@ -68,6 +69,8 @@ private:
 
     SequencePrivate *m_p;
     QString m_sName;
+
+    friend class PropsheetWriter;
 };
 }
 
