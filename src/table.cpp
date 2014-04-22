@@ -129,6 +129,24 @@ void Table::removeProperty(QString name) const
     m_p->pProps.remove(name);
 }
 
+/*!
+ * \brief Merge property table "proptable" with the current table.
+ * \param proptable The table to merge with the current one.
+ * \param replace_props Whether properties from "proptable" should replace existing properties.
+ */
+
+void Table::merge(Table &proptable, bool replace_props) const
+{
+    QList<QString> props = proptable.m_p->pProps.keys();
+    for (int i=0;i<props.size();i++)
+    {
+        if (!m_p->pProps.contains(props[i]))
+            m_p->pProps.insert(proptable.property(props[i]));
+        else if (replace_props)
+            m_p->pProps[props[i]] = proptable.property(props[i]);
+    }
+}
+
 bool Table::operator ==(const Table& other)
 {
     return name() == other.name();

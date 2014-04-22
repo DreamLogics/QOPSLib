@@ -53,6 +53,7 @@ public:
     Property property(QString name) const;
     void removeProperty(QString name) const;
 
+    void merge(Table &proptable, bool replace_props = true) const;
 
     virtual bool operator==(const Table&);
 #ifndef NO_SMART_POINTERS
