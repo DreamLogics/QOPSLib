@@ -141,7 +141,7 @@ void Table::merge(Table &proptable, bool replace_props) const
     for (int i=0;i<props.size();i++)
     {
         if (!m_p->pProps.contains(props[i]))
-            m_p->pProps.insert(proptable.property(props[i]));
+            m_p->pProps.insert(props[i],proptable.property(props[i]));
         else if (replace_props)
             m_p->pProps[props[i]] = proptable.property(props[i]);
     }
