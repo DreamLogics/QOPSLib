@@ -135,7 +135,7 @@ void Table::removeProperty(QString name) const
  * \param replace_props Whether properties from "proptable" should replace existing properties.
  */
 
-void Table::merge(Table &proptable, bool replace_props) const
+void Table::merge(Table proptable, bool replace_props) const
 {
     QList<QString> props = proptable.m_p->pProps.keys();
     for (int i=0;i<props.size();i++)
