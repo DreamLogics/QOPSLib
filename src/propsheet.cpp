@@ -142,6 +142,20 @@ void Propsheet::addObjectPropertyTable(Table t, QString ns) const
 }
 
 /*!
+ * \brief Check if a object property table exists in this propery sheet.
+ * \param id The id of the table.
+ * \param ns The namespace.
+ * \return True if the table exists.
+ */
+
+bool Propsheet::hasObjectPropertyTable(QString id, QString ns) const
+{
+    if (m_p->objectPropTables.contains(ns))
+        return m_p->objectPropTables[ns].contains(id);
+    return false;
+}
+
+/*!
  * \brief Get the %sequence named "id".
  * \param id The id/name of the %sequence.
  * \param ns The namespace.

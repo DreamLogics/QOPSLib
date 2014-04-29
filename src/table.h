@@ -49,11 +49,16 @@ public:
 #endif
     QString name() const;
 
+    void addParent(Table parent) const;
+    void removeParent(Table parent) const;
+    QList<Table> parents() const;
+
     void addProperty(Property prop) const;
     Property property(QString name) const;
     void removeProperty(QString name) const;
+    QStringList properties() const;
 
-    void merge(Table proptable, bool replace_props = true) const;
+    void merge(Table proptable, bool replace_props = true, bool merge_parents = false) const;
 
     virtual bool operator==(const Table&);
 #ifndef NO_SMART_POINTERS

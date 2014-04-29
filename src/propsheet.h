@@ -53,6 +53,7 @@ public:
 
     Table objectPropertyTable(QString id, QString ns = QString()) const;
     void addObjectPropertyTable(Table t, QString ns = QString()) const;
+    bool hasObjectPropertyTable(QString id, QString ns = QString()) const;
 
     Sequence sequence(QString id, QString ns = QString()) const;
     void addSequence(Sequence seq, QString ns = QString()) const;

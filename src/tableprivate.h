@@ -25,6 +25,7 @@
 
 #include <QHash>
 #include "property.h"
+#include "table.h"
 
 namespace QOPS
 {
@@ -43,6 +44,8 @@ private:
     InformationProvider *pIP;
 
     QHash<QString,Property> pProps;
+
+    QList<Table> parents;
 
     friend class Table;
     friend class Propsheet;

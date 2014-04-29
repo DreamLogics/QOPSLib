@@ -187,6 +187,8 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
     Sequence seq;
 
     QRegExp spaces("[ \t\r\n]+");
+    QRegExp parents("([^:]+):(.+)");
+    QRegExp parentns("([^:]*)::(.+)");
 
     mode cmode = mode_base;
     //mode pmode;
@@ -232,8 +234,33 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             else if (c == '{') // not in at-rule, must be prop table
             {
                 //object prop table found
+                //check for parents
                 temp.replace(spaces,"");
-                table = Table(temp);
+                if (parents.indexIn(temp) != -1)
+                {
+                    table = Table(parents.cap(1));
+                    QStringList parent_list = parents.cap(2).split(",");
+                    for (int pi=0;pi<parent_list.size();pi++)
+                    {
+                        QString ptname,ptns;
+                        if (parentns.indexIn(parent_list[pi]) != -1)
+                        {
+                            ptname = parentns.cap(2);
+                            ptns = parentns.cap(1);
+                        }
+                        else
+                        {
+                            ptname = parent_list[pi];
+                            ptns = /*ns*/QString();
+                        }
+                        if (propsheet.hasObjectPropertyTable(ptname,ns))
+                            table.addParent(propsheet.objectPropertyTable(ptname,ns));
+                        /*else if (propsheet.hasObjectPropertyTable(ptname))
+                            table.addParent(propsheet.objectPropertyTable(ptname));*/
+                    }
+                }
+                else
+                    table = Table(temp);
                 temp="";
                 propsheet.addObjectPropertyTable(table);
                 pmode.push_front(cmode);
@@ -302,7 +329,33 @@ void PropsheetReaderPrivate::load(QString data, Propsheet &propsheet)
             {
                 //object prop table found
                 temp.replace(spaces,"");
-                table = Table(temp);
+                if (parents.indexIn(temp) != -1)
+                {
+                    table = Table(parents.cap(1));
+                    QStringList parent_list = parents.cap(2).split(",");
+                    for (int pi=0;pi<parent_list.size();pi++)
+                    {
+                        QString ptname,ptns;
+                        if (parentns.indexIn(parent_list[pi]) != -1)
+                        {
+                            ptname = parentns.cap(2);
+                            ptns = parentns.cap(1);
+                            if (ptns == "")
+                                ptns = QString();
+                        }
+                        else
+                        {
+                            ptname = parent_list[pi];
+                            ptns = ns;
+                        }
+                        if (propsheet.hasObjectPropertyTable(ptname,ns))
+                            table.addParent(propsheet.objectPropertyTable(ptname,ns));
+                        else if (propsheet.hasObjectPropertyTable(ptname))
+                            table.addParent(propsheet.objectPropertyTable(ptname));
+                    }
+                }
+                else
+                    table = Table(temp);
                 temp="";
                 propsheet.addObjectPropertyTable(table,ns);
                 pmode.push_front(cmode);
