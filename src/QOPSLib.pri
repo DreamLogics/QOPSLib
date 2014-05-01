@@ -4,6 +4,7 @@ INCLUDEPATH += $$PWD
 contains(QT, gui) {
     DEFINES += USE_GUI
     message("GUI support enabled.")
+    QMAKE_POST_LINK += printf \""$$LITERAL_HASH"define USE_GUI\n\" >> src/qopslib.h
 }
 
 !contains(QT, gui) {
@@ -12,6 +13,7 @@ contains(QT, gui) {
 
 contains(DEFINES, NO_SMART_POINTERS) {
     message("Smart pointers disabled.")
+    QMAKE_POST_LINK += printf \""$$LITERAL_HASH"define NO_SMART_POINTERS\n\" >> src/qopslib.h
 }
 
 !contains(DEFINES, NO_SMART_POINTERS) {

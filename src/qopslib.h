@@ -20,15 +20,13 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef QOPSLIB_H
-#define QOPSLIB_H
 
-#include <propsheet.h>
-#include <propsheetreader.h>
-#include <propsheetwriter.h>
-#include <table.h>
-#include <property.h>
-#include <valuetypes.h>
+#include <QOPSLib/propsheet.h>
+#include <QOPSLib/propsheetreader.h>
+#include <QOPSLib/propsheetwriter.h>
+#include <QOPSLib/table.h>
+#include <QOPSLib/property.h>
+#include <QOPSLib/valuetypes.h>
 
 /*! \mainpage Object Property Sheet Library
  *
@@ -54,4 +52,3 @@
 #define QOPS_NO_ERR 0
 #define QOPS_ERR_PARSE 1 //parsing error
 
-#endif // QOPSLIB_H
