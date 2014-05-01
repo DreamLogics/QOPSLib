@@ -11,7 +11,7 @@ TEMPLATE = lib
 
 DEFINES += QOPSLIB_LIBRARY
 
-include(QOPSLib.pri)
+include(src/QOPSLib.pri)
 
 unix {
     headers.path    = /usr/local/include/QOPSLib
