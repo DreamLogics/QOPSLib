@@ -21,13 +21,6 @@
 **
 ****************************************************************************/
 
-#include <QOPSLib/propsheet.h>
-#include <QOPSLib/propsheetreader.h>
-#include <QOPSLib/propsheetwriter.h>
-#include <QOPSLib/table.h>
-#include <QOPSLib/property.h>
-#include <QOPSLib/valuetypes.h>
-
 /*! \mainpage Object Property Sheet Library
  *
  * \section intro_sec Introduction
@@ -51,4 +44,3 @@
 
 #define QOPS_NO_ERR 0
 #define QOPS_ERR_PARSE 1 //parsing error
-

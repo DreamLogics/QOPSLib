@@ -1,0 +1,8 @@
+
+
+#include <QOPSLib/propsheet.h>
+#include <QOPSLib/propsheetreader.h>
+#include <QOPSLib/propsheetwriter.h>
+#include <QOPSLib/table.h>
+#include <QOPSLib/property.h>
+#include <QOPSLib/valuetypes.h>
